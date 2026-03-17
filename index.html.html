@@ -1,0 +1,326 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Dashboard FV ARG — 2025 / 2026</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.js"></script>
+<style>
+*{box-sizing:border-box;margin:0;padding:0;}
+body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;background:#f5f5f3;color:#1a1a1a;}
+.page{max-width:1100px;margin:0 auto;padding:2rem 1.5rem;}
+.top-header{display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:1.5rem;padding-bottom:1rem;border-bottom:2px solid #0C447C;}
+.head-title{font-size:20px;font-weight:700;color:#0C447C;}
+.head-sub{font-size:12px;color:#888;margin-top:3px;}
+.conf{font-size:10px;background:#fdecea;color:#c0392b;padding:3px 10px;border-radius:20px;font-weight:600;letter-spacing:.5px;}
+.year-tabs{display:flex;gap:8px;margin-bottom:1rem;}
+.ytab{padding:7px 18px;border-radius:8px;border:1px solid #ddd;font-size:13px;cursor:pointer;background:#fff;color:#555;font-family:inherit;font-weight:600;transition:all .15s;}
+.ytab.active{background:#0C447C;color:#fff;border-color:#0C447C;}
+.ytab:hover:not(.active){background:#f0f0ec;}
+.view-tabs{display:flex;gap:6px;margin-bottom:1.5rem;}
+.vtab{padding:5px 14px;border-radius:6px;border:1px solid #ddd;font-size:12px;cursor:pointer;background:#fff;color:#555;font-family:inherit;transition:all .15s;}
+.vtab.active{background:#185FA5;color:#fff;border-color:#185FA5;}
+.vtab:hover:not(.active){background:#f0f0ec;}
+.month-nav{display:flex;gap:7px;margin-bottom:1.5rem;flex-wrap:wrap;align-items:center;}
+.mbtn{padding:5px 11px;border-radius:6px;border:1px solid #ddd;font-size:12px;cursor:pointer;background:#fff;color:#555;font-family:inherit;transition:all .15s;}
+.mbtn.active{background:#185FA5;color:#fff;border-color:#185FA5;}
+.mbtn:hover:not(.active){background:#f0f0ec;}
+.mbtn.off{opacity:.35;cursor:not-allowed;}
+.kpi-tabs{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:1rem;}
+.ktab{padding:5px 12px;border-radius:6px;border:1px solid #ddd;font-size:12px;cursor:pointer;background:#fff;color:#555;font-family:inherit;transition:all .15s;}
+.ktab.active{background:#993556;color:#fff;border-color:#993556;}
+.ktab:hover:not(.active){background:#f0f0ec;}
+.section-title{font-size:11px;font-weight:700;color:#888;letter-spacing:1px;text-transform:uppercase;margin-bottom:10px;}
+.grid-cards{display:grid;gap:10px;margin-bottom:1.5rem;}
+.rep-card{background:#fff;border-radius:10px;padding:14px;border:1px solid #e8e8e4;}
+.rep-avatar{width:32px;height:32px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:700;margin-bottom:8px;}
+.rep-name{font-size:13px;font-weight:600;color:#1a1a1a;}
+.rep-val{font-size:24px;font-weight:700;color:#1a1a1a;line-height:1.1;}
+.rep-label{font-size:11px;color:#888;margin-top:2px;}
+.rank-badge{display:inline-block;font-size:10px;padding:2px 7px;border-radius:10px;margin-top:5px;font-weight:600;}
+.two-col{display:grid;grid-template-columns:1fr 1fr;gap:1rem;margin-bottom:1.5rem;}
+.chart-card{background:#fff;border-radius:12px;padding:1.25rem;border:1px solid #e8e8e4;}
+.chart-title{font-size:13px;font-weight:600;color:#333;margin-bottom:.75rem;}
+.chart-wrap{position:relative;height:200px;}
+.bar-wrap{position:relative;}
+.legend{display:flex;flex-wrap:wrap;gap:10px;margin-bottom:8px;font-size:11px;color:#666;}
+.legend span{display:flex;align-items:center;gap:4px;}
+.ldot{width:10px;height:10px;border-radius:2px;flex-shrink:0;}
+.notice{background:#fff8e1;border:1px solid #ffe082;border-radius:10px;padding:10px 14px;font-size:12px;color:#7a5c00;margin-bottom:1.5rem;}
+.gbar{background:#deeaf8;border-radius:10px;padding:10px 14px;margin-bottom:1.5rem;font-size:12px;color:#0C447C;display:flex;align-items:center;gap:10px;}
+.gav{width:28px;height:28px;border-radius:50%;background:#185FA5;color:#fff;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;flex-shrink:0;}
+.scorecard{background:#fff;border:1px solid #e8e8e4;border-radius:12px;overflow:hidden;margin-bottom:1rem;}
+.metodo{background:#f0f4fa;border:1px solid #c5d8f0;border-radius:10px;padding:10px 14px;font-size:12px;color:#3a5a80;line-height:1.7;margin-bottom:1rem;}
+.metodo-title{font-size:10px;font-weight:700;color:#185FA5;letter-spacing:.8px;text-transform:uppercase;margin-bottom:4px;}
+.rolling-pill{font-size:11px;background:#e8f0fb;color:#185FA5;padding:3px 10px;border-radius:20px;font-weight:600;}
+.footer{text-align:center;font-size:12px;color:#aaa;margin-top:2rem;padding-top:1rem;border-top:1px solid #e8e8e4;}
+@media(max-width:700px){.two-col{grid-template-columns:1fr;}.grid-cards{grid-template-columns:repeat(2,1fr)!important;}}
+</style>
+</head>
+<body>
+<div class="page">
+
+<div class="top-header">
+  <div>
+    <div class="head-title">Dashboard FV ARG — 2025 / 2026</div>
+    <div class="head-sub">Performance mensual · KPIs · Base actualizada</div>
+  </div>
+
+</div>
+
+<div class="year-tabs">
+  <button class="ytab active" onclick="setYear(2025,this)">2025 — Año completo</button>
+  <button class="ytab" onclick="setYear(2026,this)">2026 — Mar'25 a Feb'26</button>
+</div>
+<div class="view-tabs">
+  <button class="vtab active" onclick="setView('kpis',this)">KPIs mensuales</button>
+  <button class="vtab" onclick="setView('resumen',this)">Resumen anual</button>
+</div>
+
+<div id="n26" class="notice" style="display:none;">⚠️ <strong>2026 en curso:</strong> El gráfico de evolución muestra Mar 2025 – Feb 2026. PXS de Febrero 2026 pendiente. Gabriela excluida del ranking (Jefa de Equipo). Se incorporan 2 nuevos representantes próximamente.</div>
+<div id="g26" class="gbar" style="display:none;"><div class="gav">GA</div><div><strong>Gabriela — Jefa de Equipo 2026.</strong> Excluida del ranking de campo. Enero: 229 calls · 59 PXS · 38 PAP · 40 PSP.</div></div>
+
+<div id="viewKPIs">
+  <div class="kpi-tabs" id="kpiTabs"></div>
+  <div style="display:flex;align-items:center;gap:10px;margin-bottom:8px;">
+    <span class="section-title" style="margin:0;">Mes:</span>
+    <span class="rolling-pill" id="rollingPill" style="display:none;">Gráfico de evolución: últimos 12 meses</span>
+  </div>
+  <div class="month-nav" id="monthNav"></div>
+  <div class="section-title" id="cardsTitle"></div>
+  <div class="grid-cards" id="repCards"></div>
+  <div class="two-col">
+    <div class="chart-card">
+      <div class="chart-title" id="barTitle"></div>
+      <div class="bar-wrap" id="barWrap"><canvas id="barChart"></canvas></div>
+    </div>
+    <div class="chart-card">
+      <div class="chart-title" id="lineTitle"></div>
+      <div id="lineLegend" class="legend"></div>
+      <div class="chart-wrap"><canvas id="lineChart"></canvas></div>
+    </div>
+  </div>
+</div>
+
+<div id="viewResumen" style="display:none;">
+  <div class="section-title" id="scTitle"></div>
+  <div class="scorecard" id="scorecardEl"></div>
+  <div class="metodo">
+    <div class="metodo-title">Metodología</div>
+    <span id="metodoText"></span>
+  </div>
+</div>
+
+<div class="footer">Dashboard FV ARG · 2025–2026 · Confidencial y privilegiado</div>
+
+</div>
+<script>
+const COL={
+  AGOSTINA:{bg:'#993556',light:'#f5dce6',text:'#72243E'},
+  FERNANDO:{bg:'#0F6E56',light:'#d6f0e8',text:'#085041'},
+  GABRIELA:{bg:'#185FA5',light:'#deeaf8',text:'#0C447C'},
+  MARCELA: {bg:'#854F0B',light:'#faeada',text:'#633806'},
+  SERGIO:  {bg:'#888780',light:'#ededea',text:'#444441'}
+};
+
+const RAW={
+  2025:{
+    calls:  {GABRIELA:[242,325,341,353,314,319,359,343,351,342,282,230],AGOSTINA:[null,null,null,null,18,344,392,371,386,399,311,239],MARCELA:[null,null,null,null,18,331,380,357,354,382,308,235],FERNANDO:[101,135,168,144,157,183,243,213,200,237,184,152],SERGIO:[84,125,110,105,116,90,96,87,159,191,167,138]},
+    pxs:   {GABRIELA:[88,93,94,101,80,102,111,117,98,120,156,171],AGOSTINA:[null,null,null,null,46,51,55,60,44,61,107,109],MARCELA:[null,null,null,null,41,39,28,38,37,35,91,91],FERNANDO:[61,58,73,80,67,61,79,74,71,82,108,98],SERGIO:[11,16,16,10,4,5,13,15,15,15,29,24]},
+    sellout:{GABRIELA:[70,67,41,132,57,152,148,150,162,120,112,null],AGOSTINA:[null,null,null,null,131,136,256,225,40,55,141,210],MARCELA:[null,null,null,null,228,51,116,45,113,169,53,null],FERNANDO:[null,null,null,null,null,null,57,50,null,null,null,20],SERGIO:[null,null,null,null,null,null,null,11,null,null,8,null]},
+    pap:   {GABRIELA:[35,39,39,38,38,null,45,23,34,41,37,33],AGOSTINA:[null,null,null,null,16,null,9,4,19,20,29,45],MARCELA:[null,null,null,null,15,null,15,9,22,24,22,16],FERNANDO:[11,7,10,21,11,null,7,5,6,7,16,18],SERGIO:[10,2,6,11,8,null,11,2,5,7,3,5]},
+    psp:   {GABRIELA:[37,36,54,59,64,84,78,69,79,68,58,65],AGOSTINA:[null,null,null,null,3,9,10,11,18,15,13,19],MARCELA:[null,null,null,null,0,8,4,16,29,20,19,32],FERNANDO:[0,0,0,1,1,9,4,9,2,4,4,5],SERGIO:[2,2,4,1,3,9,7,3,0,2,5,7]}
+  },
+  2026:{
+    calls:  {AGOSTINA:[235,303],FERNANDO:[47,211],MARCELA:[223,304]},
+    pxs:   {AGOSTINA:[175,null],FERNANDO:[125,null],MARCELA:[124,null]},
+    sellout:{AGOSTINA:[119,414],FERNANDO:[1,120],MARCELA:[22,38]},
+    pap:   {AGOSTINA:[47,42],FERNANDO:[13,25],MARCELA:[17,24]},
+    psp:   {AGOSTINA:[25,31],FERNANDO:[8,2],MARCELA:[22,19]}
+  }
+};
+
+const M25=['Ene','Feb','Mar','Abr','May','Jun','Jul','Ago','Sep','Oct','Nov','Dic'];
+const M26_NAV=['Ene 2026','Feb 2026'];
+const ROLLING_LABELS=["Mar'25","Abr'25","May'25","Jun'25","Jul'25","Ago'25","Sep'25","Oct'25","Nov'25","Dic'25","Ene'26","Feb'26"];
+const KPIS=[{key:'calls',label:'Calls'},{key:'pxs',label:'PXS'},{key:'sellout',label:'Sell Out IV'},{key:'pap',label:'Bonos PAP'},{key:'psp',label:'Reportes PSP'}];
+
+let year=2025,kpi='calls',view='kpis',mi=0;
+let barI=null,lineI=null;
+
+const cap=s=>s.charAt(0)+s.slice(1).toLowerCase();
+const sumArr=a=>a?a.filter(v=>v!=null).reduce((x,y)=>x+y,0):0;
+
+function getVal(rep){const d=RAW[year][kpi][rep];return(d&&d[mi]!=null)?d[mi]:null;}
+
+function repsWithData(){
+  return Object.keys(RAW[year][kpi])
+    .filter(r=>getVal(r)!==null)
+    .sort((a,b)=>getVal(b)-getVal(a));
+}
+
+function monthLabel(){return year===2025?M25[mi]+' 2025':M26_NAV[mi];}
+function kpiLabel(){return KPIS.find(k=>k.key===kpi).label;}
+
+function setYear(y,el){
+  year=y;mi=0;
+  document.querySelectorAll('.ytab').forEach(t=>t.classList.remove('active'));
+  el.classList.add('active');
+  document.getElementById('n26').style.display=y===2026?'block':'none';
+  document.getElementById('g26').style.display=y===2026?'block':'none';
+  document.getElementById('rollingPill').style.display=y===2026?'inline-block':'none';
+  buildMonthNav();renderAll();
+}
+function setView(v,el){
+  view=v;
+  document.querySelectorAll('.vtab').forEach(t=>t.classList.remove('active'));
+  el.classList.add('active');
+  document.getElementById('viewKPIs').style.display=v==='kpis'?'block':'none';
+  document.getElementById('viewResumen').style.display=v==='resumen'?'block':'none';
+  if(v==='resumen')renderScorecard();
+}
+function setKPI(k,el){
+  kpi=k;
+  document.querySelectorAll('.ktab').forEach(t=>t.classList.remove('active'));
+  el.classList.add('active');
+  buildMonthNav();renderAll();
+}
+function setMonth(idx){
+  mi=idx;
+  document.querySelectorAll('.mbtn').forEach((b,i)=>b.classList.toggle('active',i===idx));
+  renderKPIs();
+}
+
+function buildKPITabs(){
+  document.getElementById('kpiTabs').innerHTML=KPIS.map((k,i)=>
+    `<button class="ktab${i===0?' active':''}" onclick="setKPI('${k.key}',this)">${k.label}</button>`).join('');
+}
+
+function buildMonthNav(){
+  const navM=year===2025?M25.map((m,i)=>({label:m,idx:i})):M26_NAV.map((m,i)=>({label:m,idx:i}));
+  document.getElementById('monthNav').innerHTML=navM.map(({label,idx})=>{
+    const d=RAW[year][kpi];
+    const has=Object.keys(d).some(r=>d[r]&&d[r][idx]!=null);
+    return `<button class="mbtn${idx===mi?' active':''}${!has?' off':''}" onclick="${has?'setMonth('+idx+')':'void(0)'}">${label}</button>`;
+  }).join('');
+}
+
+function renderCards(){
+  const rs=repsWithData();
+  document.getElementById('cardsTitle').textContent=`${kpiLabel()} — ${monthLabel()}`;
+  document.getElementById('repCards').style.gridTemplateColumns=`repeat(${Math.max(rs.length,1)},minmax(0,1fr))`;
+  document.getElementById('repCards').innerHTML=rs.map((rep,i)=>{
+    const v=getVal(rep);
+    return `<div class="rep-card">
+      <div class="rep-avatar" style="background:${COL[rep].light};color:${COL[rep].text}">${rep.slice(0,2)}</div>
+      <div class="rep-name">${cap(rep)}</div>
+      <div class="rep-val">${v!=null?v.toLocaleString():'—'}</div>
+      <div class="rep-label">${kpiLabel()}</div>
+      <div class="rank-badge" style="background:${COL[rep].light};color:${COL[rep].text}">#${i+1}</div>
+    </div>`;
+  }).join('');
+}
+
+function renderBar(){
+  const rs=repsWithData();
+  document.getElementById('barTitle').textContent=`Ranking — ${kpiLabel()} ${monthLabel()}`;
+  const h=rs.length*50+40;
+  document.getElementById('barWrap').style.height=h+'px';
+  if(barI)barI.destroy();
+  barI=new Chart(document.getElementById('barChart'),{
+    type:'bar',
+    data:{labels:rs.map(cap),datasets:[{data:rs.map(r=>getVal(r)||0),backgroundColor:rs.map(r=>COL[r].bg),borderRadius:4,barThickness:22}]},
+    options:{responsive:true,maintainAspectRatio:false,indexAxis:'y',
+      plugins:{legend:{display:false},tooltip:{callbacks:{label:c=>` ${c.raw.toLocaleString()} ${kpiLabel()}`}}},
+      scales:{x:{grid:{color:'rgba(0,0,0,0.05)'},ticks:{font:{size:11},color:'#888'},beginAtZero:true},
+              y:{grid:{display:false},ticks:{font:{size:12},color:'#444'}}}}
+  });
+}
+
+function getRollingData(rep){
+  const d25=RAW[2025][kpi][rep]||[];
+  const d26=RAW[2026][kpi][rep]||[];
+  return [...d25.slice(2),d26[0]??null,d26[1]??null];
+}
+
+function renderLine(){
+  let labels,datasets,title;
+  if(year===2025){
+    labels=M25;
+    const rs=Object.keys(RAW[2025][kpi]);
+    title=`Evolución 2025 — ${kpiLabel()}`;
+    document.getElementById('lineLegend').innerHTML=rs.map(r=>`<span><span class="ldot" style="background:${COL[r].bg}"></span>${cap(r)}</span>`).join('');
+    datasets=rs.map(rep=>({label:cap(rep),data:RAW[2025][kpi][rep]||[],borderColor:COL[rep].bg,backgroundColor:'transparent',borderWidth:2,pointRadius:3,spanGaps:false,tension:0.3}));
+  } else {
+    labels=ROLLING_LABELS;
+    const rs=Object.keys(RAW[2026][kpi]);
+    title=`Evolución Mar'25–Feb'26 — ${kpiLabel()}`;
+    document.getElementById('lineLegend').innerHTML=rs.map(r=>`<span><span class="ldot" style="background:${COL[r].bg}"></span>${cap(r)}</span>`).join('');
+    datasets=rs.map(rep=>({label:cap(rep),data:getRollingData(rep),borderColor:COL[rep].bg,backgroundColor:'transparent',borderWidth:2,pointRadius:3,spanGaps:false,tension:0.3}));
+  }
+  document.getElementById('lineTitle').textContent=title;
+  if(lineI)lineI.destroy();
+  lineI=new Chart(document.getElementById('lineChart'),{
+    type:'line',
+    data:{labels,datasets},
+    options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}},
+      scales:{x:{grid:{color:'rgba(0,0,0,0.05)'},ticks:{font:{size:10},color:'#888',autoSkip:false,maxRotation:45}},
+              y:{grid:{color:'rgba(0,0,0,0.05)'},ticks:{font:{size:11},color:'#888'},beginAtZero:true}}}
+  });
+}
+
+function renderKPIs(){renderCards();renderBar();renderLine();}
+function renderAll(){renderKPIs();if(view==='resumen')renderScorecard();}
+
+function computeScores(){
+  const repList=Object.keys(RAW[year].calls);
+  const n=repList.length;
+  const totals={};
+  repList.forEach(r=>{totals[r]={};KPIS.forEach(k=>{totals[r][k.key]=sumArr(RAW[year][k.key][r]);});});
+  const scores={};
+  repList.forEach(r=>{scores[r]={};});
+  KPIS.forEach(k=>{
+    const sorted=[...repList].sort((a,b)=>totals[b][k.key]-totals[a][k.key]);
+    sorted.forEach((r,i)=>{scores[r][k.key]=n-i;});
+  });
+  repList.forEach(r=>{scores[r]._avg=(KPIS.map(k=>scores[r][k.key]).reduce((a,b)=>a+b,0)/KPIS.length).toFixed(1);});
+  return{scores,repList:repList.sort((a,b)=>parseFloat(scores[b]._avg)-parseFloat(scores[a]._avg))};
+}
+
+const PILL=(avg,max)=>{const v=parseFloat(avg),pct=v/max;return pct>=0.9?'Top':pct>=0.7?'Alto':pct>=0.5?'Medio':pct>=0.3?'Bajo':'Crítico';};
+const PC={Top:{bg:'#deeaf8',c:'#0C447C'},Alto:{bg:'#f5dce6',c:'#72243E'},Medio:{bg:'#faeada',c:'#633806'},Bajo:{bg:'#fdecea',c:'#c0392b'},Crítico:{bg:'#fdecea',c:'#c0392b'}};
+
+function renderScorecard(){
+  const{scores,repList}=computeScores();
+  const n=repList.length;
+  const maxScore=n;
+  document.getElementById('scTitle').textContent=`Scorecard — ${year===2026?'2026 (Ene–Feb)':'2025 completo'}`;
+  document.getElementById('metodoText').innerHTML=`Puntaje <strong>1 a ${maxScore} por KPI</strong> según ranking del equipo (1° = ${maxScore} pts … último = 1 pt). <strong>Score final = promedio simple</strong> de los 5 KPIs.${year===2025?' <strong>Nota 2025:</strong> Agostina y Marcela ingresaron en mayo — sus resultados son comparativamente más fuertes al considerar el tiempo efectivo.':' <strong>2026:</strong> Solo Enero–Febrero, '+n+' representantes de campo.'}`;
+  const cols='130px repeat(5,1fr) 80px';
+  let html=`<div style="display:grid;grid-template-columns:${cols};background:#0C447C;color:#fff;font-size:11px;font-weight:600;">
+    <div style="padding:8px 12px;">Representante</div>
+    ${KPIS.map(k=>`<div style="padding:8px 6px;text-align:center;">${k.label}</div>`).join('')}
+    <div style="padding:8px 6px;text-align:center;">Score</div>
+  </div>`;
+  repList.forEach((rep,ri)=>{
+    const sc=scores[rep],avg=sc._avg,pl=PILL(avg,maxScore),pc=PC[pl],bg=ri%2===1?'#fafaf8':'#fff';
+    html+=`<div style="display:grid;grid-template-columns:${cols};border-bottom:1px solid #f0f0ec;font-size:12px;background:${bg};">
+      <div style="padding:8px 12px;display:flex;align-items:center;gap:7px;">
+        <div style="width:26px;height:26px;border-radius:50%;background:${COL[rep].light};color:${COL[rep].text};display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:700;flex-shrink:0;">${rep.slice(0,2)}</div>
+        <span style="font-weight:600;">${cap(rep)}</span>
+      </div>
+      ${KPIS.map(k=>{const s=sc[k.key],pct=Math.round((s/maxScore)*100);return`<div style="padding:8px 6px;text-align:center;"><span style="color:${COL[rep].bg};font-weight:700;">${s}</span><div style="background:#eee;border-radius:4px;height:5px;margin-top:3px;"><div style="border-radius:4px;height:5px;width:${pct}%;background:${COL[rep].bg};"></div></div></div>`;}).join('')}
+      <div style="padding:8px 6px;text-align:center;font-weight:700;font-size:14px;color:${COL[rep].bg};">
+        ${avg} <span style="display:inline-block;font-size:10px;padding:2px 6px;border-radius:10px;font-weight:600;background:${pc.bg};color:${pc.c};">${pl}</span>
+      </div>
+    </div>`;
+  });
+  document.getElementById('scorecardEl').innerHTML=html;
+}
+
+buildKPITabs();
+buildMonthNav();
+renderAll();
+</script>
+</body>
+</html>
