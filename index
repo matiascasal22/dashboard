@@ -1,0 +1,763 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Dashboard FV ARG — 2025 / 2026</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.js"></script>
+<style>
+*{box-sizing:border-box;margin:0;padding:0;}
+body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;background:#f5f5f3;color:#1a1a1a;}
+.page{max-width:1100px;margin:0 auto;padding:2rem 1.5rem;}
+.top-header{display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:1.5rem;padding-bottom:1rem;border-bottom:2px solid #0C447C;}
+.head-title{font-size:20px;font-weight:700;color:#0C447C;}
+.head-sub{font-size:12px;color:#888;margin-top:3px;}
+.conf{font-size:10px;background:#fdecea;color:#c0392b;padding:3px 10px;border-radius:20px;font-weight:600;letter-spacing:.5px;}
+.year-tabs{display:flex;gap:8px;margin-bottom:1rem;}
+.ytab{padding:7px 18px;border-radius:8px;border:1px solid #ddd;font-size:13px;cursor:pointer;background:#fff;color:#555;font-family:inherit;font-weight:600;transition:all .15s;}
+.ytab.active{background:#0C447C;color:#fff;border-color:#0C447C;}
+.ytab:hover:not(.active){background:#f0f0ec;}
+.view-tabs{display:flex;gap:6px;margin-bottom:1.5rem;}
+.vtab{padding:5px 14px;border-radius:6px;border:1px solid #ddd;font-size:12px;cursor:pointer;background:#fff;color:#555;font-family:inherit;transition:all .15s;}
+.vtab.active{background:#185FA5;color:#fff;border-color:#185FA5;}
+.vtab:hover:not(.active){background:#f0f0ec;}
+.month-nav{display:flex;gap:7px;margin-bottom:1.5rem;flex-wrap:wrap;align-items:center;}
+.mbtn{padding:5px 11px;border-radius:6px;border:1px solid #ddd;font-size:12px;cursor:pointer;background:#fff;color:#555;font-family:inherit;transition:all .15s;}
+.mbtn.active{background:#185FA5;color:#fff;border-color:#185FA5;}
+.mbtn:hover:not(.active){background:#f0f0ec;}
+.mbtn.off{opacity:.35;cursor:not-allowed;}
+.kpi-tabs{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:1rem;}
+.ktab{padding:5px 12px;border-radius:6px;border:1px solid #ddd;font-size:12px;cursor:pointer;background:#fff;color:#555;font-family:inherit;transition:all .15s;}
+.ktab.active{background:#993556;color:#fff;border-color:#993556;}
+.ktab:hover:not(.active){background:#f0f0ec;}
+.section-title{font-size:11px;font-weight:700;color:#888;letter-spacing:1px;text-transform:uppercase;margin-bottom:10px;}
+.grid-cards{display:grid;gap:10px;margin-bottom:1.5rem;}
+.rep-card{background:#fff;border-radius:10px;padding:14px;border:1px solid #e8e8e4;}
+.rep-avatar{width:32px;height:32px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:700;margin-bottom:8px;}
+.rep-name{font-size:13px;font-weight:600;color:#1a1a1a;}
+.rep-val{font-size:24px;font-weight:700;color:#1a1a1a;line-height:1.1;}
+.rep-label{font-size:11px;color:#888;margin-top:2px;}
+.rank-badge{display:inline-block;font-size:10px;padding:2px 7px;border-radius:10px;margin-top:5px;font-weight:600;}
+.two-col{display:grid;grid-template-columns:1fr 1fr;gap:1rem;margin-bottom:1.5rem;}
+.chart-card{background:#fff;border-radius:12px;padding:1.25rem;border:1px solid #e8e8e4;}
+.chart-title{font-size:13px;font-weight:600;color:#333;margin-bottom:.75rem;}
+.chart-wrap{position:relative;height:200px;}
+.bar-wrap{position:relative;}
+.legend{display:flex;flex-wrap:wrap;gap:10px;margin-bottom:8px;font-size:11px;color:#666;}
+.legend span{display:flex;align-items:center;gap:4px;}
+.ldot{width:10px;height:10px;border-radius:2px;flex-shrink:0;}
+.notice{background:#fff8e1;border:1px solid #ffe082;border-radius:10px;padding:10px 14px;font-size:12px;color:#7a5c00;margin-bottom:1.5rem;}
+.gbar{background:#deeaf8;border-radius:10px;padding:10px 14px;margin-bottom:1.5rem;font-size:12px;color:#0C447C;display:flex;align-items:center;gap:10px;}
+.gav{width:28px;height:28px;border-radius:50%;background:#185FA5;color:#fff;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;flex-shrink:0;}
+.scorecard{background:#fff;border:1px solid #e8e8e4;border-radius:12px;overflow:hidden;margin-bottom:1rem;}
+.metodo{background:#f0f4fa;border:1px solid #c5d8f0;border-radius:10px;padding:10px 14px;font-size:12px;color:#3a5a80;line-height:1.7;margin-bottom:1rem;}
+.metodo-title{font-size:10px;font-weight:700;color:#185FA5;letter-spacing:.8px;text-transform:uppercase;margin-bottom:4px;}
+.rolling-pill{font-size:11px;background:#e8f0fb;color:#185FA5;padding:3px 10px;border-radius:20px;font-weight:600;}
+.footer{text-align:center;font-size:12px;color:#aaa;margin-top:2rem;padding-top:1rem;border-top:1px solid #e8e8e4;}
+
+/* Loading / error states */
+#loadingOverlay{position:fixed;inset:0;background:rgba(245,245,243,0.92);display:flex;flex-direction:column;align-items:center;justify-content:center;z-index:999;gap:14px;}
+.spinner{width:36px;height:36px;border:3px solid #ddd;border-top-color:#0C447C;border-radius:50%;animation:spin .8s linear infinite;}
+@keyframes spin{to{transform:rotate(360deg);}}
+#loadingText{font-size:14px;color:#555;}
+#errorBox{background:#fdecea;border:1px solid #f5c6c6;border-radius:10px;padding:12px 16px;font-size:13px;color:#c0392b;margin-bottom:1.5rem;display:none;}
+
+/* Config panel */
+#configPanel{background:#fff;border:1px solid #c5d8f0;border-radius:12px;padding:1.25rem;margin-bottom:1.5rem;display:none;}
+#configPanel h3{font-size:13px;font-weight:700;color:#0C447C;margin-bottom:10px;}
+#configPanel label{font-size:12px;color:#555;display:block;margin-bottom:4px;}
+#configPanel input{width:100%;padding:7px 10px;border:1px solid #ddd;border-radius:7px;font-size:12px;font-family:inherit;margin-bottom:10px;}
+#configPanel .btn-row{display:flex;gap:8px;}
+.btn-primary{padding:7px 16px;background:#0C447C;color:#fff;border:none;border-radius:7px;font-size:12px;font-family:inherit;cursor:pointer;font-weight:600;}
+.btn-secondary{padding:7px 16px;background:#fff;color:#555;border:1px solid #ddd;border-radius:7px;font-size:12px;font-family:inherit;cursor:pointer;}
+.btn-config{font-size:11px;background:#e8f0fb;color:#185FA5;padding:4px 12px;border-radius:20px;border:none;cursor:pointer;font-family:inherit;font-weight:600;}
+.btn-refresh{font-size:11px;background:#e8faf0;color:#0F6E56;padding:4px 12px;border-radius:20px;border:none;cursor:pointer;font-family:inherit;font-weight:600;margin-left:6px;}
+.status-dot{display:inline-block;width:7px;height:7px;border-radius:50%;margin-right:5px;}
+.status-ok{background:#2ecc71;}
+.status-err{background:#e74c3c;}
+.status-loading{background:#f39c12;}
+
+@media(max-width:700px){.two-col{grid-template-columns:1fr;}.grid-cards{grid-template-columns:repeat(2,1fr)!important;}}
+</style>
+</head>
+<body>
+
+<div id="loadingOverlay">
+  <div class="spinner"></div>
+  <div id="loadingText">Cargando datos desde Google Sheets…</div>
+</div>
+
+<div class="page">
+
+<div class="top-header">
+  <div>
+    <div class="head-title">Dashboard FV ARG — 2025 / 2026</div>
+    <div class="head-sub">Performance mensual · KPIs · Base actualizada · <span class="status-dot status-loading" id="statusDot"></span><span id="statusText">Conectando…</span></div>
+  </div>
+  <div style="display:flex;gap:6px;align-items:center;flex-wrap:wrap;">
+    <button class="btn-config" onclick="toggleConfig()">⚙ Configurar Sheet</button>
+    <button class="btn-refresh" onclick="loadData()">↻ Actualizar</button>
+  </div>
+</div>
+
+<!-- Config panel -->
+<div id="configPanel">
+  <h3>Configuración de fuente de datos</h3>
+
+  <div style="display:flex;gap:8px;margin-bottom:14px;">
+    <button class="vtab active" id="tabOneDrive" onclick="switchSource('onedrive')">📊 Excel / OneDrive</button>
+    <button class="vtab" id="tabSheets" onclick="switchSource('sheets')">📗 Google Sheets</button>
+  </div>
+
+  <!-- OneDrive -->
+  <div id="srcOneDrive">
+    <label>URL de descarga directa del Excel en OneDrive</label>
+    <input type="text" id="onedriveUrlInput" placeholder="https://onedrive.live.com/download?...">
+    <div style="background:#e8f0fb;border-radius:6px;padding:10px 12px;font-size:11px;color:#185FA5;margin-bottom:10px;line-height:1.8;">
+      <strong>Cómo obtener la URL:</strong><br>
+      1. Abrí el Excel en OneDrive → clic en <strong>los tres puntos ···</strong><br>
+      2. <strong>Insertar / Compartir → Copiar vínculo</strong> → copiá ese link<br>
+      3. Pegalo acá y el dashboard lo convierte automáticamente ✓<br>
+      <br>
+      ⚠️ El archivo debe ser accesible: <strong>Cualquiera con el vínculo puede ver</strong>
+    </div>
+    <label>Nombre de la hoja (pestaña del Excel)</label>
+    <input type="text" id="onedriveSheetInput" placeholder="Hoja1" value="Hoja1">
+  </div>
+
+  <!-- Google Sheets -->
+  <div id="srcSheets" style="display:none;">
+    <label>ID de tu Google Sheet (de la URL)</label>
+    <input type="text" id="sheetIdInput" placeholder="Ejemplo: 1BxiMVs0XRA5nFMdKvBdBZjgmUUqptlbs74OgVE2upms">
+    <label>Nombre de la hoja (pestaña)</label>
+    <input type="text" id="sheetNameInput" placeholder="Hoja1" value="Hoja1">
+    <div style="background:#fff8e1;border-radius:6px;padding:8px 10px;font-size:11px;color:#7a5c00;margin-bottom:10px;">
+      ⚠️ Tu Google Sheet debe estar publicada: <strong>Archivo → Compartir → Publicar en la web → Hoja → CSV → Publicar</strong>
+    </div>
+  </div>
+
+  <div class="btn-row">
+    <button class="btn-primary" onclick="saveAndLoad()">Guardar y cargar</button>
+    <button class="btn-secondary" onclick="toggleConfig()">Cancelar</button>
+  </div>
+</div>
+
+<div id="errorBox"></div>
+
+<div id="mainContent" style="display:none;">
+
+<div class="year-tabs">
+  <button class="ytab active" onclick="setYear(2025,this)">2025 — Año completo</button>
+  <button class="ytab" onclick="setYear(2026,this)">2026 — Mar'25 a Feb'26</button>
+</div>
+<div class="view-tabs">
+  <button class="vtab active" onclick="setView('kpis',this)">KPIs mensuales</button>
+  <button class="vtab" onclick="setView('resumen',this)">Resumen anual</button>
+</div>
+
+<div id="n26" class="notice" style="display:none;">⚠️ <strong>2026 en curso:</strong> El gráfico de evolución muestra Mar 2025 – Feb 2026. Gabriela excluida del ranking (Jefa de Equipo). Se incorporan 2 nuevos representantes próximamente.</div>
+<div id="g26" class="gbar" style="display:none;"><div class="gav">GA</div><div id="g26text"></div></div>
+
+<div id="viewKPIs">
+  <div class="kpi-tabs" id="kpiTabs"></div>
+  <div style="display:flex;align-items:center;gap:10px;margin-bottom:8px;">
+    <span class="section-title" style="margin:0;">Mes:</span>
+    <span class="rolling-pill" id="rollingPill" style="display:none;">Gráfico de evolución: últimos 12 meses</span>
+  </div>
+  <div class="month-nav" id="monthNav"></div>
+  <div class="section-title" id="cardsTitle"></div>
+  <div class="grid-cards" id="repCards"></div>
+  <div class="two-col">
+    <div class="chart-card">
+      <div class="chart-title" id="barTitle"></div>
+      <div class="bar-wrap" id="barWrap"><canvas id="barChart"></canvas></div>
+    </div>
+    <div class="chart-card">
+      <div class="chart-title" id="lineTitle"></div>
+      <div id="lineLegend" class="legend"></div>
+      <div class="chart-wrap"><canvas id="lineChart"></canvas></div>
+    </div>
+  </div>
+</div>
+
+<div id="viewResumen" style="display:none;">
+  <div class="section-title" id="scTitle"></div>
+  <div class="scorecard" id="scorecardEl"></div>
+  <div class="metodo">
+    <div class="metodo-title">Metodología</div>
+    <span id="metodoText"></span>
+  </div>
+</div>
+
+</div><!-- /mainContent -->
+
+<div class="footer">Dashboard FV ARG · 2025–2026 · Confidencial y privilegiado · Última actualización: <span id="lastUpdate">—</span></div>
+
+</div><!-- /page -->
+
+<script>
+// ─── CONFIGURACIÓN ──────────────────────────────────────────────
+const DEFAULT_SOURCE = 'sheets';
+const DEFAULT_ONEDRIVE_URL = '';
+const DEFAULT_SHEET_ID = '';
+const DEFAULT_SHEET_NAME = 'Hoja1';
+// URL CSV directa — tiene prioridad, el dashboard carga sin configuración
+const DIRECT_CSV_URL = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vSYKhuv5B65hRwb7KnWy5A5W6_-CbhTXf5mvdyNw1wjogejhSNGoom1SeaLAbc3xknyhAseO22r_M-R/pub?gid=0&single=true&output=csv';
+
+// Colores por representante (se asignan dinámicamente también)
+const PALETTE = [
+  {bg:'#993556',light:'#f5dce6',text:'#72243E'},
+  {bg:'#0F6E56',light:'#d6f0e8',text:'#085041'},
+  {bg:'#185FA5',light:'#deeaf8',text:'#0C447C'},
+  {bg:'#854F0B',light:'#faeada',text:'#633806'},
+  {bg:'#888780',light:'#ededea',text:'#444441'},
+  {bg:'#5B3FA6',light:'#ebe5f8',text:'#3d2a72'},
+  {bg:'#1a7a4a',light:'#d4f0e2',text:'#0e5232'},
+];
+
+// KPIs: key debe coincidir exactamente con los valores de columna "Indicador" en tu Sheet
+const KPIS = [
+  {key:'Calls',       label:'Calls'},
+  {key:'Pxs',         label:'PXS'},
+  {key:'Sell Out IV', label:'Sell Out IV'},
+  {key:'Bonos PAP',   label:'Bonos PAP'},
+  {key:'Reportes PSP',label:'Reportes PSP'}
+];
+
+const MESES_ORDER = ['ENERO','FEBRERO','MARZO','ABRIL','MAYO','JUNIO','JULIO','AGOSTO','SEPTIEMBRE','OCTUBRE','NOVIEMBRE','DICIEMBRE'];
+const M_SHORT = ['Ene','Feb','Mar','Abr','May','Jun','Jul','Ago','Sep','Oct','Nov','Dic'];
+
+// ─── ESTADO GLOBAL ───────────────────────────────────────────────
+let RAW = {};          // {2025: {Calls: {GABRIELA: [12 valores]}, ...}, 2026: {...}}
+let COL = {};          // {NOMBRE: {bg, light, text}}
+let ALL_REPS = [];
+let FIELD_REPS_2026 = []; // Excluye Jefa de Equipo
+let JEFA_2026 = null;
+
+let year=2025, kpi=KPIS[0].key, view='kpis', mi=0;
+let barI=null, lineI=null;
+
+// ─── UTILS ───────────────────────────────────────────────────────
+const cap = s => s.charAt(0).toUpperCase() + s.slice(1).toLowerCase();
+const sumArr = a => a ? a.filter(v=>v!=null).reduce((x,y)=>x+y,0) : 0;
+
+// ─── GETTERS DE CONFIG ───────────────────────────────────────────
+function getSource(){ return localStorage.getItem('fv_source') || DEFAULT_SOURCE; }
+function getOnedriveUrl(){ return localStorage.getItem('fv_onedrive_url') || DEFAULT_ONEDRIVE_URL; }
+function getSheetId(){ return localStorage.getItem('fv_sheet_id') || DEFAULT_SHEET_ID; }
+function getSheetName(){ return localStorage.getItem('fv_sheet_name') || DEFAULT_SHEET_NAME; }
+
+// Convierte cualquier link de OneDrive a URL de descarga directa como CSV
+function onedriveToCSV(rawUrl, sheetName){
+  // Si ya es download link, lo dejamos pero cambiamos formato
+  let url = rawUrl.trim();
+  // Convertir link de compartir a download
+  url = url.replace('1drv.ms','onedrive.live.com');
+  // Para Excel en OneDrive, usamos la API de descarga como CSV
+  // Formato: https://onedrive.live.com/download?resid=...&ithint=file%2Cxlsx&authkey=...
+  if(url.includes('onedrive.live.com') && !url.includes('download')){
+    url = url.replace('/view.aspx','').replace('?','?download=1&');
+  }
+  // Para links tipo "embed" o "sharing" de OneDrive for Business / SharePoint
+  if(url.includes('sharepoint.com') || url.includes('my.sharepoint.com')){
+    // SharePoint: agregar ?download=1
+    url = url.includes('?') ? url + '&download=1' : url + '?download=1';
+  }
+  return url;
+}
+
+function showError(msg){
+  const b = document.getElementById('errorBox');
+  b.innerHTML = '❌ ' + msg;
+  b.style.display = 'block';
+  setStatus('err','Error al cargar datos');
+}
+function clearError(){ document.getElementById('errorBox').style.display='none'; }
+
+function setStatus(type, text){
+  const dot = document.getElementById('statusDot');
+  dot.className = 'status-dot status-'+type;
+  document.getElementById('statusText').textContent = text;
+}
+
+// ─── CARGA DE DATOS ──────────────────────────────────────────────
+async function loadData(){
+  clearError();
+  setStatus('loading','Actualizando…');
+  document.getElementById('loadingOverlay').style.display='flex';
+  document.getElementById('mainContent').style.display='none';
+
+  // Si hay URL directa hardcodeada, la usamos siempre (ignora config manual)
+  let url = DIRECT_CSV_URL || null;
+
+  if(!url){
+    const source = getSource();
+    if(source === 'onedrive' && !getOnedriveUrl()){
+      document.getElementById('loadingOverlay').style.display='none';
+      document.getElementById('configPanel').style.display='block';
+      setStatus('err','Configurá tu Excel primero');
+      document.getElementById('errorBox').innerHTML='⚙️ Pegá la URL de tu Excel en OneDrive para continuar.';
+      document.getElementById('errorBox').style.display='block';
+      return;
+    }
+    if(source === 'sheets' && !getSheetId() && !localStorage.getItem('fv_csv_url')){
+      document.getElementById('loadingOverlay').style.display='none';
+      document.getElementById('configPanel').style.display='block';
+      setStatus('err','Configurá tu Sheet primero');
+      document.getElementById('errorBox').innerHTML='⚙️ Ingresá el ID de tu Google Sheet para continuar.';
+      document.getElementById('errorBox').style.display='block';
+      return;
+    }
+    // URL guardada manualmente por el usuario
+    url = localStorage.getItem('fv_csv_url') ||
+      `https://docs.google.com/spreadsheets/d/${getSheetId()}/gviz/tq?tqx=out:csv&sheet=${encodeURIComponent(getSheetName())}`;
+  }
+
+  try {
+    const resp = await fetch(url);
+    if(!resp.ok) throw new Error(`HTTP ${resp.status}`);
+    const text = await resp.text();
+
+    // Verificar que no sea HTML de error
+    if(text.trim().startsWith('<')){
+      throw new Error('La respuesta no es un CSV válido. Verificá que el archivo sea accesible públicamente.');
+    }
+
+    parseCSV(text);
+    buildColorMap();
+    document.getElementById('lastUpdate').textContent = new Date().toLocaleString('es-AR');
+    setStatus('ok','Datos actualizados');
+    document.getElementById('loadingOverlay').style.display='none';
+    document.getElementById('mainContent').style.display='block';
+    buildKPITabs();
+    buildMonthNav();
+    renderAll();
+  } catch(e){
+    document.getElementById('loadingOverlay').style.display='none';
+    if(source === 'onedrive'){
+      showError(`No se pudo leer el Excel. <br><br>
+        <strong>Solución más simple:</strong> En Excel, guardá la hoja como <strong>CSV</strong> y subila a OneDrive. Compartí ese CSV con "Cualquiera con el vínculo puede ver" y pegá ese link.<br><br>
+        Error técnico: ${e.message}`);
+    } else {
+      showError(`No se pudo leer la Sheet. Asegurate de que esté publicada como CSV. (${e.message})`);
+    }
+    if(ALL_REPS.length > 0){
+      document.getElementById('mainContent').style.display='block';
+    }
+  }
+}
+
+// ─── PARSER CSV ──────────────────────────────────────────────────
+function parseCSVLine(line, sep){
+  const parts = [];
+  let cur = '', inQ = false;
+  for(let i=0;i<line.length;i++){
+    const c = line[i];
+    if(c==='"'){
+      if(inQ && line[i+1]==='"'){cur+='"';i++;} // escaped quote
+      else inQ=!inQ;
+    } else if(c===sep && !inQ){
+      parts.push(cur.trim());
+      cur='';
+    } else {
+      cur+=c;
+    }
+  }
+  parts.push(cur.trim());
+  return parts;
+}
+
+function normalizeHeader(h){
+  return h.replace(/"/g,'').trim().toLowerCase()
+    .normalize('NFD').replace(/[\u0300-\u036f]/g,''); // quita tildes
+}
+
+function parseCSV(text){
+  // Limpiar BOM y espacios raros
+  text = text.replace(/^\uFEFF/,'').trim();
+  const lines = text.split(/\r?\n/);
+  if(lines.length < 2) throw new Error('CSV vacío o con solo encabezado');
+
+  const header = lines[0];
+  const sep = header.includes(';') ? ';' : ',';
+
+  const rows = lines.slice(1)
+    .filter(l=>l.trim()!=='')
+    .map(l=>parseCSVLine(l, sep));
+
+  // Detectar columnas — normalizamos tildes y mayúsculas
+  const headers = parseCSVLine(header, sep).map(normalizeHeader);
+  const iRep  = headers.findIndex(h=>h.includes('representante'));
+  const iInd  = headers.findIndex(h=>h.includes('indicador'));
+  const iMes  = headers.findIndex(h=>h==='mes'||h.includes('mes'));
+  const iVal  = headers.findIndex(h=>h.includes('valor'));
+  // "año" sin tilde = "ano"
+  const iAnio = headers.findIndex(h=>h==='ano'||h==='anio'||h.includes('ano')||h.includes('year'));
+
+  if([iRep,iInd,iMes,iVal].some(i=>i<0)){
+    console.error('Headers detectados:', headers);
+    throw new Error(`Columnas no encontradas. Headers detectados: [${headers.join(', ')}]. Verificá que la sheet tenga: Representante, Indicador, Mes, Valor, Año`);
+  }
+
+  // Resetear
+  RAW = {};
+  const repsSet = new Set();
+
+  rows.forEach(r => {
+    if(r.length < 4) return;
+    const rep    = (r[iRep]||'').replace(/"/g,'').trim().toUpperCase();
+    const ind    = (r[iInd]||'').replace(/"/g,'').trim();
+    const mes    = (r[iMes]||'').replace(/"/g,'').trim().toUpperCase();
+    const valStr = (r[iVal]||'').replace(/"/g,'').trim();
+    const anioRaw= iAnio>=0 ? (r[iAnio]||'').replace(/"/g,'').trim() : '2025';
+    const anio   = parseInt(anioRaw) || 2025;
+
+    if(!rep || !ind || !mes) return;
+    const val = valStr==='' || valStr==='-' ? null : parseFloat(valStr.replace(',','.'));
+    const mIdx = MESES_ORDER.indexOf(mes);
+    if(mIdx < 0) return;
+    if(!RAW[anio]) RAW[anio] = {};
+    if(!RAW[anio][ind]) RAW[anio][ind] = {};
+    if(!RAW[anio][ind][rep]) RAW[anio][ind][rep] = Array(12).fill(null);
+    RAW[anio][ind][rep][mIdx] = val;
+    repsSet.add(rep);
+  });
+
+  ALL_REPS = [...repsSet].sort();
+
+  // Detectar quién es Jefa de Equipo en 2026
+  // Heurística: quien tiene datos en 2025 pero no en los primeros meses de 2026
+  // O simplemente confiar en que GABRIELA es jefa (como en los datos originales)
+  // Esto se puede hacer configurable más adelante
+  JEFA_2026 = null;
+  FIELD_REPS_2026 = [];
+
+  if(RAW[2026]){
+    const reps2026 = new Set();
+    Object.values(RAW[2026]).forEach(kpiData => {
+      Object.keys(kpiData).forEach(r => reps2026.add(r));
+    });
+    // Por ahora todos son de campo en 2026, excepto GABRIELA si existe
+    reps2026.forEach(r => {
+      if(r === 'GABRIELA'){
+        JEFA_2026 = 'GABRIELA';
+      } else {
+        FIELD_REPS_2026.push(r);
+      }
+    });
+  }
+
+  // Asegurar que 2025 y 2026 existan aunque estén vacíos
+  if(!RAW[2025]) RAW[2025] = {};
+  if(!RAW[2026]) RAW[2026] = {};
+  KPIS.forEach(k => {
+    if(!RAW[2025][k.key]) RAW[2025][k.key] = {};
+    if(!RAW[2026][k.key]) RAW[2026][k.key] = {};
+  });
+}
+
+// ─── COLOR MAP ───────────────────────────────────────────────────
+function buildColorMap(){
+  COL = {};
+  ALL_REPS.forEach((rep, i) => {
+    COL[rep] = PALETTE[i % PALETTE.length];
+  });
+}
+
+// ─── CONFIG PANEL ────────────────────────────────────────────────
+let currentSource = 'onedrive';
+
+function switchSource(src){
+  currentSource = src;
+  document.getElementById('srcOneDrive').style.display = src==='onedrive' ? 'block' : 'none';
+  document.getElementById('srcSheets').style.display   = src==='sheets'   ? 'block' : 'none';
+  document.getElementById('tabOneDrive').classList.toggle('active', src==='onedrive');
+  document.getElementById('tabSheets').classList.toggle('active',   src==='sheets');
+}
+
+function toggleConfig(){
+  const p = document.getElementById('configPanel');
+  const showing = p.style.display !== 'none';
+  p.style.display = showing ? 'none' : 'block';
+  if(!showing){
+    const src = getSource();
+    switchSource(src);
+    document.getElementById('onedriveUrlInput').value  = getOnedriveUrl();
+    document.getElementById('onedriveSheetInput').value= getSheetName();
+    document.getElementById('sheetIdInput').value      = getSheetId();
+    document.getElementById('sheetNameInput').value    = getSheetName();
+  }
+}
+
+function saveAndLoad(){
+  if(currentSource === 'onedrive'){
+    const url = document.getElementById('onedriveUrlInput').value.trim();
+    const sheet = document.getElementById('onedriveSheetInput').value.trim() || 'Hoja1';
+    if(!url){ alert('Pegá la URL de tu archivo en OneDrive'); return; }
+    localStorage.setItem('fv_source', 'onedrive');
+    localStorage.setItem('fv_onedrive_url', url);
+    localStorage.setItem('fv_sheet_name', sheet);
+  } else {
+    const id = document.getElementById('sheetIdInput').value.trim();
+    const name = document.getElementById('sheetNameInput').value.trim() || 'Hoja1';
+    if(!id){ alert('Ingresá el ID de la sheet'); return; }
+    localStorage.setItem('fv_source', 'sheets');
+    localStorage.setItem('fv_sheet_id', id);
+    localStorage.setItem('fv_sheet_name', name);
+  }
+  document.getElementById('configPanel').style.display='none';
+  loadData();
+}
+
+// ─── HELPERS DE DATOS ────────────────────────────────────────────
+function repsForYear(){
+  if(year === 2026) return FIELD_REPS_2026;
+  const s = new Set();
+  Object.values(RAW[2025]).forEach(kd => Object.keys(kd).forEach(r => s.add(r)));
+  return [...s];
+}
+
+function getVal(rep){
+  const d = RAW[year]?.[kpi]?.[rep];
+  return (d && d[mi] != null) ? d[mi] : null;
+}
+
+function repsWithData(){
+  return repsForYear()
+    .filter(r => getVal(r) !== null)
+    .sort((a,b) => getVal(b) - getVal(a));
+}
+
+function monthsForYear(){
+  if(year === 2025) return M_SHORT.map((m,i)=>({label:m+' 2025',idx:i}));
+  // 2026: meses disponibles
+  const avail = new Set();
+  Object.values(RAW[2026]).forEach(kd => {
+    Object.values(kd).forEach(arr => {
+      arr.forEach((v,i) => { if(v!=null) avail.add(i); });
+    });
+  });
+  return [...avail].sort((a,b)=>a-b).map(i=>({label:M_SHORT[i]+' 2026',idx:i}));
+}
+
+function monthLabel(){ return year===2025 ? M_SHORT[mi]+' 2025' : M_SHORT[mi]+' 2026'; }
+function kpiLabel(){ return KPIS.find(k=>k.key===kpi)?.label || kpi; }
+
+// ─── ROLLING LABELS (últimos 12 meses) ───────────────────────────
+function getRollingLabels(){
+  const months = ['Mar','Abr','May','Jun','Jul','Ago','Sep','Oct','Nov','Dic'];
+  return [...months.map(m=>m+"'25"), "Ene'26", "Feb'26"];
+}
+function getRollingData(rep){
+  const d25 = RAW[2025]?.[kpi]?.[rep] || [];
+  const d26 = RAW[2026]?.[kpi]?.[rep] || [];
+  return [...d25.slice(2), d26[0]??null, d26[1]??null];
+}
+
+// ─── RENDER TABS ─────────────────────────────────────────────────
+function buildKPITabs(){
+  document.getElementById('kpiTabs').innerHTML = KPIS.map((k,i)=>
+    `<button class="ktab${i===0?' active':''}" onclick="setKPI('${k.key}',this)">${k.label}</button>`
+  ).join('');
+  kpi = KPIS[0].key;
+}
+
+function buildMonthNav(){
+  const months = monthsForYear();
+  // Asegurar que mi sea válido
+  if(!months.find(m=>m.idx===mi)) mi = months[0]?.idx || 0;
+  document.getElementById('monthNav').innerHTML = months.map(({label,idx})=>{
+    const has = repsForYear().some(r => {
+      const d = RAW[year]?.[kpi]?.[r];
+      return d && d[idx] != null;
+    });
+    return `<button class="mbtn${idx===mi?' active':''}${!has?' off':''}" onclick="${has?'setMonth('+idx+')':'void(0)'}">${label}</button>`;
+  }).join('');
+}
+
+// ─── RENDER CARDS ────────────────────────────────────────────────
+function renderCards(){
+  const rs = repsWithData();
+  document.getElementById('cardsTitle').textContent = `${kpiLabel()} — ${monthLabel()}`;
+  document.getElementById('repCards').style.gridTemplateColumns = `repeat(${Math.max(rs.length,1)},minmax(0,1fr))`;
+  document.getElementById('repCards').innerHTML = rs.map((rep,i) => {
+    const v = getVal(rep);
+    return `<div class="rep-card">
+      <div class="rep-avatar" style="background:${COL[rep].light};color:${COL[rep].text}">${rep.slice(0,2)}</div>
+      <div class="rep-name">${cap(rep)}</div>
+      <div class="rep-val">${v!=null?v.toLocaleString('es-AR'):'—'}</div>
+      <div class="rep-label">${kpiLabel()}</div>
+      <div class="rank-badge" style="background:${COL[rep].light};color:${COL[rep].text}">#${i+1}</div>
+    </div>`;
+  }).join('');
+}
+
+// ─── RENDER BAR ──────────────────────────────────────────────────
+function renderBar(){
+  const rs = repsWithData();
+  document.getElementById('barTitle').textContent = `Ranking — ${kpiLabel()} ${monthLabel()}`;
+  const h = rs.length*50+40;
+  document.getElementById('barWrap').style.height = h+'px';
+  if(barI) barI.destroy();
+  barI = new Chart(document.getElementById('barChart'),{
+    type:'bar',
+    data:{labels:rs.map(cap),datasets:[{data:rs.map(r=>getVal(r)||0),backgroundColor:rs.map(r=>COL[r].bg),borderRadius:4,barThickness:22}]},
+    options:{responsive:true,maintainAspectRatio:false,indexAxis:'y',
+      plugins:{legend:{display:false},tooltip:{callbacks:{label:c=>` ${c.raw.toLocaleString('es-AR')} ${kpiLabel()}`}}},
+      scales:{x:{grid:{color:'rgba(0,0,0,0.05)'},ticks:{font:{size:11},color:'#888'},beginAtZero:true},
+              y:{grid:{display:false},ticks:{font:{size:12},color:'#444'}}}}
+  });
+}
+
+// ─── RENDER LINE ─────────────────────────────────────────────────
+function renderLine(){
+  let labels, datasets, title;
+  const allReps = repsForYear();
+
+  if(year === 2025){
+    labels = M_SHORT.map(m=>m+' 25');
+    title = `Evolución 2025 — ${kpiLabel()}`;
+    document.getElementById('lineLegend').innerHTML = allReps.map(r=>
+      `<span><span class="ldot" style="background:${COL[r]?.bg||'#999'}"></span>${cap(r)}</span>`).join('');
+    datasets = allReps.map(rep=>({
+      label:cap(rep),
+      data:RAW[2025]?.[kpi]?.[rep] || [],
+      borderColor:COL[rep]?.bg||'#999',
+      backgroundColor:'transparent',
+      borderWidth:2,pointRadius:3,spanGaps:false,tension:0.3
+    }));
+  } else {
+    labels = getRollingLabels();
+    title = `Evolución Mar'25–Feb'26 — ${kpiLabel()}`;
+    document.getElementById('lineLegend').innerHTML = FIELD_REPS_2026.map(r=>
+      `<span><span class="ldot" style="background:${COL[r]?.bg||'#999'}"></span>${cap(r)}</span>`).join('');
+    datasets = FIELD_REPS_2026.map(rep=>({
+      label:cap(rep),
+      data:getRollingData(rep),
+      borderColor:COL[rep]?.bg||'#999',
+      backgroundColor:'transparent',
+      borderWidth:2,pointRadius:3,spanGaps:false,tension:0.3
+    }));
+  }
+
+  document.getElementById('lineTitle').textContent = title;
+  if(lineI) lineI.destroy();
+  lineI = new Chart(document.getElementById('lineChart'),{
+    type:'line',
+    data:{labels,datasets},
+    options:{responsive:true,maintainAspectRatio:false,
+      plugins:{legend:{display:false}},
+      scales:{
+        x:{grid:{color:'rgba(0,0,0,0.05)'},ticks:{font:{size:10},color:'#888',autoSkip:false,maxRotation:45}},
+        y:{grid:{color:'rgba(0,0,0,0.05)'},ticks:{font:{size:11},color:'#888'},beginAtZero:true}
+      }}
+  });
+}
+
+// ─── RENDER GABRIELA BAR ─────────────────────────────────────────
+function updateGabrielaBar(){
+  if(!JEFA_2026) return;
+  const calls = sumArr(RAW[2026]?.['Calls']?.[JEFA_2026]);
+  const pxs   = sumArr(RAW[2026]?.['Pxs']?.[JEFA_2026]);
+  const pap   = sumArr(RAW[2026]?.['Bonos PAP']?.[JEFA_2026]);
+  const psp   = sumArr(RAW[2026]?.['Reportes PSP']?.[JEFA_2026]);
+  document.getElementById('g26text').innerHTML =
+    `<strong>${cap(JEFA_2026)} — Jefa de Equipo 2026.</strong> Excluida del ranking de campo. Calls: ${calls} · PXS: ${pxs} · PAP: ${pap} · PSP: ${psp}`;
+}
+
+// ─── SCORECARD ───────────────────────────────────────────────────
+function computeScores(){
+  const repList = year===2026 ? FIELD_REPS_2026 : repsForYear();
+  const n = repList.length;
+  const totals = {};
+  repList.forEach(r => {
+    totals[r] = {};
+    KPIS.forEach(k => { totals[r][k.key] = sumArr(RAW[year]?.[k.key]?.[r]); });
+  });
+  const scores = {};
+  repList.forEach(r => { scores[r] = {}; });
+  KPIS.forEach(k => {
+    const sorted = [...repList].sort((a,b)=>totals[b][k.key]-totals[a][k.key]);
+    sorted.forEach((r,i) => { scores[r][k.key] = n-i; });
+  });
+  repList.forEach(r => {
+    scores[r]._avg = (KPIS.map(k=>scores[r][k.key]).reduce((a,b)=>a+b,0)/KPIS.length).toFixed(1);
+  });
+  return {scores, repList: repList.sort((a,b)=>parseFloat(scores[b]._avg)-parseFloat(scores[a]._avg))};
+}
+
+const PILL=(avg,max)=>{const v=parseFloat(avg),pct=v/max;return pct>=0.9?'Top':pct>=0.7?'Alto':pct>=0.5?'Medio':pct>=0.3?'Bajo':'Crítico';};
+const PC={Top:{bg:'#deeaf8',c:'#0C447C'},Alto:{bg:'#f5dce6',c:'#72243E'},Medio:{bg:'#faeada',c:'#633806'},Bajo:{bg:'#fdecea',c:'#c0392b'},Crítico:{bg:'#fdecea',c:'#c0392b'}};
+
+function renderScorecard(){
+  const{scores,repList}=computeScores();
+  const n=repList.length;
+  document.getElementById('scTitle').textContent=`Scorecard — ${year===2026?'2026 (datos cargados)':'2025 completo'}`;
+  document.getElementById('metodoText').innerHTML=`Puntaje <strong>1 a ${n} por KPI</strong> según ranking del equipo (1° = ${n} pts … último = 1 pt). <strong>Score final = promedio simple</strong> de los 5 KPIs.`;
+  const cols='130px repeat(5,1fr) 80px';
+  let html=`<div style="display:grid;grid-template-columns:${cols};background:#0C447C;color:#fff;font-size:11px;font-weight:600;">
+    <div style="padding:8px 12px;">Representante</div>
+    ${KPIS.map(k=>`<div style="padding:8px 6px;text-align:center;">${k.label}</div>`).join('')}
+    <div style="padding:8px 6px;text-align:center;">Score</div>
+  </div>`;
+  repList.forEach((rep,ri)=>{
+    const sc=scores[rep],avg=sc._avg,pl=PILL(avg,n),pc=PC[pl],bg=ri%2===1?'#fafaf8':'#fff';
+    html+=`<div style="display:grid;grid-template-columns:${cols};border-bottom:1px solid #f0f0ec;font-size:12px;background:${bg};">
+      <div style="padding:8px 12px;display:flex;align-items:center;gap:7px;">
+        <div style="width:26px;height:26px;border-radius:50%;background:${COL[rep]?.light||'#eee'};color:${COL[rep]?.text||'#333'};display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:700;flex-shrink:0;">${rep.slice(0,2)}</div>
+        <span style="font-weight:600;">${cap(rep)}</span>
+      </div>
+      ${KPIS.map(k=>{const s=sc[k.key],pct=Math.round((s/n)*100);return`<div style="padding:8px 6px;text-align:center;"><span style="color:${COL[rep]?.bg||'#999'};font-weight:700;">${s}</span><div style="background:#eee;border-radius:4px;height:5px;margin-top:3px;"><div style="border-radius:4px;height:5px;width:${pct}%;background:${COL[rep]?.bg||'#999'};"></div></div></div>`;}).join('')}
+      <div style="padding:8px 6px;text-align:center;font-weight:700;font-size:14px;color:${COL[rep]?.bg||'#999'};">
+        ${avg} <span style="display:inline-block;font-size:10px;padding:2px 6px;border-radius:10px;font-weight:600;background:${pc.bg};color:${pc.c};">${pl}</span>
+      </div>
+    </div>`;
+  });
+  document.getElementById('scorecardEl').innerHTML=html;
+}
+
+// ─── CONTROLES ───────────────────────────────────────────────────
+function setYear(y,el){
+  year=y; mi=0;
+  document.querySelectorAll('.ytab').forEach(t=>t.classList.remove('active'));
+  el.classList.add('active');
+  document.getElementById('n26').style.display=y===2026?'block':'none';
+  document.getElementById('g26').style.display=(y===2026&&JEFA_2026)?'block':'none';
+  document.getElementById('rollingPill').style.display=y===2026?'inline-block':'none';
+  if(y===2026) updateGabrielaBar();
+  // Ajustar mi al primer mes disponible del año
+  const months = monthsForYear();
+  if(months.length) mi = months[0].idx;
+  buildMonthNav(); renderAll();
+}
+function setView(v,el){
+  view=v;
+  document.querySelectorAll('.vtab').forEach(t=>t.classList.remove('active'));
+  el.classList.add('active');
+  document.getElementById('viewKPIs').style.display=v==='kpis'?'block':'none';
+  document.getElementById('viewResumen').style.display=v==='resumen'?'block':'none';
+  if(v==='resumen') renderScorecard();
+}
+function setKPI(k,el){
+  kpi=k;
+  document.querySelectorAll('.ktab').forEach(t=>t.classList.remove('active'));
+  el.classList.add('active');
+  buildMonthNav(); renderAll();
+}
+function setMonth(idx){
+  mi=idx;
+  document.querySelectorAll('.mbtn').forEach((b,i)=>{
+    const m = monthsForYear()[i];
+    if(m) b.classList.toggle('active', m.idx===idx);
+  });
+  renderKPIs();
+}
+
+function renderKPIs(){ renderCards(); renderBar(); renderLine(); }
+function renderAll(){ renderKPIs(); if(view==='resumen') renderScorecard(); }
+
+// ─── ARRANQUE ────────────────────────────────────────────────────
+loadData();
+</script>
+</body>
+</html>
